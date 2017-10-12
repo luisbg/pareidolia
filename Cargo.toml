@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Luis de Bethencourt <luisbg@kernel.org>"]
 
 [dependencies]
+getopts = "0.2.3"
