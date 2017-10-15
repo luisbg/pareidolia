@@ -24,7 +24,12 @@ fn main() {
 
     // Parsing
     let root_node = html::parse(html);
-    dom::print(root_node);
+    let stylesheet = css::example();
+    let styled = style::style_tree(&root_node, &stylesheet);
+
+    // Print for simple visualization
+    dom::print(root_node.clone());
+    style::print(styled.clone());
 }
 
 fn read_source(filename: String) -> String {

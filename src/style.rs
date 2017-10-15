@@ -1,11 +1,12 @@
 use dom::{Node, NodeType, ElementData};
 use css::{Selector, Rule, Stylesheet, Value, SimpleSelector, Specificity};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 // Map from CSS property names to values.
 type PropertyMap = HashMap<String, Value>;
 
 // A node with associated style data.
+#[derive(Clone)]
 pub struct StyledNode<'a> {
     node: &'a Node, // pointer to a DOM node
     specified_values: PropertyMap,
@@ -79,4 +80,58 @@ pub fn style_tree<'a>(root: &'a Node, stylesheet: &'a Stylesheet) -> StyledNode<
         },
         children: root.children.iter().map(|child| style_tree(child, stylesheet)).collect(),
     }
+}
+
+struct NodeQueue<'a> {
+    stnode: StyledNode<'a>,
+    level: u32
+}
+
+pub fn print(root_node: StyledNode) {
+    println!("Style tree:");
+    let mut node_q: VecDeque<NodeQueue> = VecDeque::new();
+
+    node_q.push_back(NodeQueue { stnode: root_node, level: 0 });
+
+    while !node_q.is_empty() {
+        // Print Node content with tree level as indentation
+        let current = node_q.pop_front().unwrap();
+
+        for _ in 0..current.level {
+            print!(" ");
+        }
+
+        match current.stnode.node.node_type {
+            NodeType::Element(ref e) => { print!("elem: {} ", e.tag_name) },
+            NodeType::Text(ref t) => { print!("txt: {} ", t) }
+        }
+
+        for (s, v) in current.stnode.specified_values.iter() {
+            print!(".{}=", s);
+            match *v {
+                Value::Keyword(_) => ( print!("? ")),
+                Value::Length(_, _) => (print!("? ")),
+                Value::ColorValue(ref c) => {
+                    print!("{}r-{}g-{}b", c.r, c.g, c.b)
+                }
+            }
+        }
+
+        // Add the children to the stack to traverse the tree
+        let mut rev_child: Vec<StyledNode> = Vec::new();
+        for child in current.stnode.children {
+          rev_child.push(child);
+        }
+        rev_child.reverse();
+
+        for child in rev_child {
+            node_q.push_front(NodeQueue {
+                stnode: child,
+                level: current.level + 1 });
+        }
+
+        print!("\n");
+    }
+
+    println!("");
 }

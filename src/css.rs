@@ -38,10 +38,10 @@ pub enum Unit {
 
 #[derive(Clone)]
 pub struct Color {
-    r: u8,
-    g: u8,
-    b: u8,
-    a: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
 }
 
 pub type Specificity = (usize, usize, usize);
@@ -55,4 +55,46 @@ impl Selector {
         let c = simple.tag_name.iter().count();
         (a, b, c)
     }
+}
+
+pub fn example() -> Stylesheet {
+    // html rules
+    let mut html_selects: Vec<Selector> = Vec::new();
+    html_selects.push(Selector::Simple(SimpleSelector {
+        tag_name: Some(String::from("html")),
+        id: None,
+        class: Vec::new()}));
+    let mut html_decls: Vec<Declaration> = Vec::new();
+    html_decls.push(Declaration {
+        name: String::from("background"),
+        value: Value::ColorValue(Color {r: 255, g: 255, b: 255, a: 255}) });
+
+    // div main rules
+    let mut main_selects: Vec<Selector> = Vec::new();
+    main_selects.push(Selector::Simple(SimpleSelector {
+        tag_name: Some(String::from("div")),
+        id: Some(String::from("main")),
+        class: Vec::new()}));
+    let mut main_decls: Vec<Declaration> = Vec::new();
+    main_decls.push(Declaration {
+        name: String::from("color"),
+        value: Value::ColorValue(Color {r: 0, g: 0, b: 255, a: 255}) });
+
+    // div second rules
+    let mut second_selects: Vec<Selector> = Vec::new();
+    second_selects.push(Selector::Simple(SimpleSelector {
+        tag_name: Some(String::from("div")),
+        id: Some(String::from("second")),
+        class: Vec::new()}));
+    let mut second_decls: Vec<Declaration> = Vec::new();
+    second_decls.push(Declaration {
+        name: String::from("color"),
+        value: Value::ColorValue(Color {r: 255, g: 0, b: 0, a: 255}) });
+
+    // Create the stylesheet from the rules
+    let mut rules: Vec<Rule> = Vec::new();
+    rules.push(Rule { selectors: html_selects, declarations: html_decls });
+    rules.push(Rule { selectors: main_selects, declarations: main_decls });
+    rules.push(Rule { selectors: second_selects, declarations: second_decls });
+    Stylesheet { rules: rules }
 }

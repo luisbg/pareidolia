@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 pub type StrMap = HashMap<String, String>;
 
+#[derive(Clone)]
 pub struct Node {
     // data common to all nodes:
     pub children: Vec<Node>,
@@ -10,11 +11,13 @@ pub struct Node {
     pub node_type: NodeType,
 }
 
+#[derive(Clone)]
 pub enum NodeType {
     Element(ElementData),
     Text(String),
 }
 
+#[derive(Clone)]
 pub struct ElementData {
     pub tag_name: String,
     pub attributes: StrMap,
@@ -53,6 +56,7 @@ impl ElementData {
 }
 
 pub fn print(root_node: Node) {
+    println!("DOM tree:");
     let mut node_q: VecDeque<NodeQueue> = VecDeque::new();
 
     node_q.push_back(NodeQueue { node: root_node, level: 0 });
@@ -85,4 +89,6 @@ pub fn print(root_node: Node) {
                 level: current.level + 1 });
         }
     }
+
+    println!("");
 }
