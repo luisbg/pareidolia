@@ -3,8 +3,8 @@ pub struct Stylesheet {
 }
 
 pub struct Rule {
-    selectors: Vec<Selector>,
-    declarations: Vec<Declaration>,
+    pub selectors: Vec<Selector>,
+    pub declarations: Vec<Declaration>,
 }
 
 pub enum Selector {
@@ -18,10 +18,11 @@ pub struct SimpleSelector {
 }
 
 pub struct Declaration {
-    name: String,
-    value: Value,
+    pub name: String,
+    pub value: Value,
 }
 
+#[derive(Clone)]
 pub enum Value {
     Keyword(String),
     Length(f32, Unit),
@@ -29,11 +30,13 @@ pub enum Value {
     // insert more values here
 }
 
+#[derive(Clone)]
 pub enum Unit {
     Px,
     // insert more units here
 }
 
+#[derive(Clone)]
 pub struct Color {
     r: u8,
     g: u8,
