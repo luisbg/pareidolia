@@ -22,6 +22,7 @@ fn main() {
 
     // Parsing
     let root_node = html::parse(html);
+    dom::print(root_node);
 }
 
 fn read_source(filename: String) -> String {
