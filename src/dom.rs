@@ -52,10 +52,10 @@ pub fn print(root_node: Node) {
         }
         match current.node.node_type {
             NodeType::Element(data) => {
-                print!("{}: {:?}\n", data.tag_name, data.attributes)
+                print!("E:: {}: {:?}\n", data.tag_name, data.attributes)
             }
             NodeType::Text(txt) => {
-                print!("{}\n", txt)
+                print!("T:: {}\n", txt)
             }
         }
 
