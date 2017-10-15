@@ -2,6 +2,8 @@ extern crate getopts;
 
 pub mod dom;
 pub mod html;
+pub mod css;
+pub mod style;
 
 use std::fs::File;
 use std::io::Read;

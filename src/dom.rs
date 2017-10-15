@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 pub type StrMap = HashMap<String, String>;
 
@@ -37,6 +37,19 @@ pub fn elem(name: String, attrs: StrMap, children: Vec<Node>) -> Node {
 struct NodeQueue {
     node: Node,
     level: u32
+}
+
+impl ElementData {
+    pub fn id(&self) -> Option<&String> {
+        self.attributes.get("id")
+    }
+
+    pub fn classes(&self) -> HashSet<&str> {
+        match self.attributes.get("class") {
+            Some(classlist) => classlist.split(' ').collect(),
+            None => HashSet::new()
+        }
+    }
 }
 
 pub fn print(root_node: Node) {
