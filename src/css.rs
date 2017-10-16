@@ -98,3 +98,13 @@ pub fn example() -> Stylesheet {
     rules.push(Rule { selectors: second_selects, declarations: second_decls });
     Stylesheet { rules: rules }
 }
+
+impl Value {
+    /// Return the size of a length in px, or zero for non-lengths.
+    pub fn to_px(&self) -> f32 {
+        match *self {
+            Value::Length(f, Unit::Px) => f,
+            _ => 0.0
+        }
+    }
+}

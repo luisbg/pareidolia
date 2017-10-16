@@ -4,6 +4,7 @@ pub mod dom;
 pub mod html;
 pub mod css;
 pub mod style;
+pub mod layout;
 
 use std::fs::File;
 use std::io::Read;
@@ -19,6 +20,11 @@ fn main() {
         matches.opt_str(flag).unwrap_or(default.to_string())
     };
 
+    // Since we don't have an actual window, hard-code the "viewport" size.
+    let mut viewport: layout::Dimensions = Default::default();
+    viewport.content.width  = 800.0;
+    viewport.content.height = 600.0;
+
     // Read input file
     let html = read_source(str_arg("h", "examples/test.html"));
 
@@ -26,6 +32,7 @@ fn main() {
     let root_node = html::parse(html);
     let stylesheet = css::example();
     let styled = style::style_tree(&root_node, &stylesheet);
+    let layout = layout::layout_tree(&styled, viewport);
 
     // Print for simple visualization
     dom::print(root_node.clone());

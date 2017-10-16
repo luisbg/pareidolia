@@ -10,7 +10,37 @@ type PropertyMap = HashMap<String, Value>;
 pub struct StyledNode<'a> {
     node: &'a Node, // pointer to a DOM node
     specified_values: PropertyMap,
-    children: Vec<StyledNode<'a>>,
+    pub children: Vec<StyledNode<'a>>,
+}
+
+pub enum Display {
+    Block,
+    None
+}
+
+impl<'a> StyledNode<'a> {
+    /// Return the specified value of a property if it exists, otherwise `None`.
+    pub fn value(&self, name: &str) -> Option<Value> {
+        self.specified_values.get(name).cloned()
+    }
+
+    /// The value of the `display` property (defaults to inline).
+    pub fn display(&self) -> Display {
+        match self.value("display") {
+            Some(Value::Keyword(s)) => match &*s {
+                "none" => Display::None,
+                _ => Display::Block
+            },
+            _ => Display::Block
+        }
+    }
+
+    /// Return the specified value of property `name`, or property `fallback_name` if that doesn't
+    /// exist. or value `default` if neither does.
+    pub fn lookup(&self, name: &str, fallback_name: &str, default: &Value) -> Value {
+        self.value(name).unwrap_or_else(|| self.value(fallback_name)
+                        .unwrap_or_else(|| default.clone()))
+    }
 }
 
 fn matches(elem: &ElementData, selector: &Selector) -> bool {
