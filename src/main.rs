@@ -10,7 +10,7 @@ use std::fs::File;
 use std::io::Read;
 
 fn main() {
-    println!("Lanch Petrichor\n");
+    println!("Lanch Pareidolia\n");
 
     let mut opts = getopts::Options::new();
     opts.optopt("h", "html", "HTML document", "FILENAME");
