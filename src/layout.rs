@@ -14,8 +14,8 @@ pub struct Dimensions {
     pub content: Rect,
 
     // Surrounding edges:
-    padding: EdgeSizes,
-    border: EdgeSizes,
+    pub padding: EdgeSizes,
+    pub border: EdgeSizes,
 }
 
 #[derive(Default, Clone, Copy)]
@@ -27,7 +27,7 @@ pub struct Rect {
 }
 
 #[derive(Default, Clone, Copy)]
-struct EdgeSizes {
+pub struct EdgeSizes {
     left: f32,
     right: f32,
     top: f32,
@@ -97,7 +97,7 @@ impl<'a> LayoutBox<'a> {
     fn layout_block(&mut self, containing_block: Dimensions) {
         // Child width can depend on parent width, so we need to calculate this box's width before
         // laying out its children.
-        self.calculate_block_width();
+        self.calculate_block_width(containing_block);
 
         // Determine where the box is located within its container.
         self.calculate_block_position(containing_block);
@@ -115,22 +115,70 @@ impl<'a> LayoutBox<'a> {
     /// http://www.w3.org/TR/CSS2/visudet.html#blockwidth
     ///
     /// Sets the horizontal padding/border dimensions, and the `width`.
-    fn calculate_block_width(&mut self) {
+    fn calculate_block_width(&mut self, containing_block: Dimensions) {
         let style = self.get_style_node();
 
         // `width` has initial value `auto`.
         let auto = Keyword("auto".to_string());
-        let width = style.value("width").unwrap_or(auto.clone());
+        let mut width = style.value("width").unwrap_or(auto.clone());
 
         // border, and padding have initial value 0.
         let zero = Length(0.0, Px);
 
-        let border_left = style.lookup("border-left-width", "border-width", &zero);
-        let border_right = style.lookup("border-right-width", "border-width", &zero);
+        let mut border_left = style.lookup("border-left-width", "border-width",
+                                       &zero);
+        let mut border_right = style.lookup("border-right-width", "border-width",
+                                        &zero);
 
         let padding_left = style.lookup("padding-left", "padding", &zero);
         let padding_right = style.lookup("padding-right", "padding", &zero);
 
+        let total: f32 = [&border_left, &border_right, &padding_left,
+                         &padding_right, &width].iter().map(|v| v.to_px()).sum();
+
+        // If width is not auto and the total is wider than the container, treat auto margins as 0.
+        if width != auto && total > containing_block.content.width {
+            if border_left == auto {
+                border_left = Length(0.0, Px);
+            }
+            if border_right == auto {
+                border_right = Length(0.0, Px);
+            }
+        }
+
+        let underflow = containing_block.content.width - total;
+
+        match (width == auto, border_left == auto, border_right == auto) {
+            // If the values are overconstrained, calculate border_right.
+            (false, false, false) => {
+                border_right = Length(border_right.to_px() + underflow, Px);
+            }
+
+            // If exactly one size is auto, its used value follows from the equality.
+            (false, false, true) => { border_right = Length(underflow, Px); }
+            (false, true, false) => { border_left  = Length(underflow, Px); }
+
+            // If width is set to auto, any other auto values become 0.
+            (true, _, _) => {
+                if border_left == auto { border_left = Length(0.0, Px); }
+                if border_right == auto { border_right = Length(0.0, Px); }
+
+                if underflow >= 0.0 {
+                    // Expand width to fill the underflow.
+                    width = Length(underflow, Px);
+                } else {
+                    // Width can't be negative. Adjust the right margin instead.
+                    width = Length(0.0, Px);
+                    border_right = Length(border_right.to_px() + underflow, Px);
+                }
+            }
+
+            // If margin-left and margin-right are both auto, their used values are equal.
+            (false, true, true) => {
+                border_left = Length(underflow / 2.0, Px);
+                border_right = Length(underflow / 2.0, Px);
+            }
+        }
         let d = &mut self.dimensions;
         d.content.width = width.to_px();
 
@@ -181,7 +229,8 @@ impl<'a> LayoutBox<'a> {
         for child in &mut self.children {
             child.layout(*d);
             // Increment the height so each child is laid out below the previous one.
-            d.content.height = d.content.height + child.dimensions.content.height;
+            d.content.height = d.content.height +
+                child.dimensions.border_box().height;
         }
     }
 
@@ -192,6 +241,28 @@ impl<'a> LayoutBox<'a> {
         if let Some(Length(h, Px)) = self.get_style_node().value("height") {
             self.dimensions.content.height = h;
         }
+    }
+}
+
+impl Rect {
+    pub fn expanded_by(self, edge: EdgeSizes) -> Rect {
+        Rect {
+            x: self.x - edge.left,
+            y: self.y - edge.top,
+            width: self.width + edge.left + edge.right,
+            height: self.height + edge.top + edge.bottom,
+        }
+    }
+}
+
+impl Dimensions {
+    /// The area covered by the content area plus its padding.
+    pub fn padding_box(self) -> Rect {
+        self.content.expanded_by(self.padding)
+    }
+
+    pub fn border_box(self) -> Rect {
+        self.padding_box().expanded_by(self.border)
     }
 }
 

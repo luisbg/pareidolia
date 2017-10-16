@@ -22,7 +22,7 @@ pub struct Declaration {
     pub value: Value,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Value {
     Keyword(String),
     Length(f32, Unit),
@@ -30,13 +30,13 @@ pub enum Value {
     // insert more values here
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Unit {
     Px,
     // insert more units here
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -79,6 +79,9 @@ pub fn example() -> Stylesheet {
     main_decls.push(Declaration {
         name: String::from("color"),
         value: Value::ColorValue(Color {r: 0, g: 0, b: 255, a: 255}) });
+    main_decls.push(Declaration {
+        name: String::from("height"),
+        value: Value::Length (400.0, Unit::Px) });
 
     // div second rules
     let mut second_selects: Vec<Selector> = Vec::new();
@@ -90,6 +93,9 @@ pub fn example() -> Stylesheet {
     second_decls.push(Declaration {
         name: String::from("color"),
         value: Value::ColorValue(Color {r: 255, g: 0, b: 0, a: 255}) });
+    second_decls.push(Declaration {
+        name: String::from("height"),
+        value: Value::Length (250.0, Unit::Px) });
 
     // Create the stylesheet from the rules
     let mut rules: Vec<Rule> = Vec::new();
