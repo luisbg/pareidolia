@@ -37,6 +37,7 @@ fn main() {
     // Print for simple visualization
     dom::print(root_node.clone());
     style::print(styled.clone());
+    layout::print(layout.clone());
 }
 
 fn read_source(filename: String) -> String {

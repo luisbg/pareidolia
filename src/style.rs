@@ -8,7 +8,7 @@ type PropertyMap = HashMap<String, Value>;
 // A node with associated style data.
 #[derive(Clone)]
 pub struct StyledNode<'a> {
-    node: &'a Node, // pointer to a DOM node
+    pub node: &'a Node, // pointer to a DOM node
     specified_values: PropertyMap,
     pub children: Vec<StyledNode<'a>>,
 }

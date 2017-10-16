@@ -3,6 +3,8 @@
 use style::{StyledNode, Display};
 use css::Value::{Keyword, Length};
 use css::Unit::Px;
+use std::collections::VecDeque;
+use dom::NodeType;
 
 pub use self::BoxType::{AnonymousBlock, BlockNode};
 
@@ -33,12 +35,14 @@ struct EdgeSizes {
 }
 
 /// A node in the layout tree.
+#[derive(Clone)]
 pub struct LayoutBox<'a> {
     pub dimensions: Dimensions,
     pub box_type: BoxType<'a>,
     pub children: Vec<LayoutBox<'a>>,
 }
 
+#[derive(Clone)]
 pub enum BoxType<'a> {
     BlockNode(&'a StyledNode<'a>),
     AnonymousBlock,
@@ -189,4 +193,58 @@ impl<'a> LayoutBox<'a> {
             self.dimensions.content.height = h;
         }
     }
+}
+
+struct NodeQueue<'a> {
+    lbnode: LayoutBox<'a>,
+    level: u32
+}
+
+pub fn print(root_node: LayoutBox) {
+    println!("Layout tree:");
+    let mut node_q: VecDeque<NodeQueue> = VecDeque::new();
+
+    node_q.push_back(NodeQueue { lbnode: root_node, level: 0 });
+
+    while !node_q.is_empty() {
+        // Print Node content with tree level as indentation
+        let current = node_q.pop_front().unwrap();
+
+        for _ in 0..current.level {
+            print!(" ");
+        }
+
+        // print node info
+        match current.lbnode.box_type {
+            BlockNode(sn) => {
+                let name = match sn.node.node_type {
+                    NodeType::Element(ref e) => ("elem", &e.tag_name),
+                    NodeType::Text(ref s) => ("txt", s),
+                };
+                print!("{}: {} -- ({},{}) [{},{}]", name.0, name.1,
+                       current.lbnode.dimensions.content.x,
+                       current.lbnode.dimensions.content.y,
+                       current.lbnode.dimensions.content.width,
+                       current.lbnode.dimensions.content.height);
+            }
+            _ => ()
+        }
+
+        // Add the children to the stack to traverse the tree
+        let mut rev_child: Vec<LayoutBox> = Vec::new();
+        for child in current.lbnode.children {
+          rev_child.push(child);
+        }
+        rev_child.reverse();
+
+        for child in rev_child {
+            node_q.push_front(NodeQueue {
+                lbnode: child,
+                level: current.level + 1 });
+        }
+
+        print!("\n");
+    }
+
+    println!("");
 }
