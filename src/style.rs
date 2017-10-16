@@ -140,9 +140,9 @@ pub fn print(root_node: StyledNode) {
             print!(".{}=", s);
             match *v {
                 Value::Keyword(_) => ( print!("? ")),
-                Value::Length(_, _) => (print!("? ")),
+                Value::Length(l, _) => (print!("{}px ", l)),
                 Value::ColorValue(ref c) => {
-                    print!("{}r-{}g-{}b", c.r, c.g, c.b)
+                    print!("{}r-{}g-{}b ", c.r, c.g, c.b)
                 }
             }
         }
