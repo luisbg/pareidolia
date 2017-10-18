@@ -5,6 +5,7 @@ pub mod html;
 pub mod css;
 pub mod style;
 pub mod layout;
+pub mod painting;
 
 use std::fs::File;
 use std::io::Read;
@@ -33,11 +34,13 @@ fn main() {
     let stylesheet = css::example();
     let styled = style::style_tree(&root_node, &stylesheet);
     let layout = layout::layout_tree(&styled, viewport);
+    let display_list = painting::build_display_list(&layout);
 
     // Print for simple visualization
     dom::print(root_node.clone());
     style::print(styled.clone());
     layout::print(layout.clone());
+    painting::print(display_list.clone());
 }
 
 fn read_source(filename: String) -> String {

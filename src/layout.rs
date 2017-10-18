@@ -20,18 +20,18 @@ pub struct Dimensions {
 
 #[derive(Default, Clone, Copy)]
 pub struct Rect {
-    x: f32,
-    y: f32,
+    pub x: f32,
+    pub y: f32,
     pub width: f32,
     pub height: f32,
 }
 
 #[derive(Default, Clone, Copy)]
 pub struct EdgeSizes {
-    left: f32,
-    right: f32,
-    top: f32,
-    bottom: f32,
+    pub left: f32,
+    pub right: f32,
+    pub top: f32,
+    pub bottom: f32,
 }
 
 /// A node in the layout tree.
