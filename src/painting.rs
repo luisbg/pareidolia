@@ -9,10 +9,10 @@ pub enum DisplayCommand {
     // insert more commands
 }
 
-struct Canvas {
-    pixels: Vec<Color>,
-    width: usize,
-    height: usize,
+pub struct Canvas {
+    pub pixels: Vec<Color>,
+    pub width: usize,
+    pub height: usize,
 }
 
 pub fn build_display_list(layout_root: &LayoutBox) -> DisplayList {
@@ -121,14 +121,13 @@ impl Canvas {
         }
     }
 
-    // Paint a tree of LayoutBoxes to an array of pixels.
-    fn paint(layout_root: &LayoutBox, bounds: Rect) -> Canvas {
-        let display_list = build_display_list(layout_root);
+    /// Paint a tree of LayoutBoxes to an array of pixels.
+    pub fn paint(display_list: &DisplayList, bounds: Rect) -> Canvas {
         let mut canvas = Canvas::new(bounds.width as usize, bounds.height as usize);
         for item in display_list {
             canvas.paint_item(&item);
         }
-        return canvas;
+        canvas
     }
 }
 

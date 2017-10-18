@@ -1,4 +1,5 @@
 extern crate getopts;
+extern crate image;
 
 pub mod dom;
 pub mod html;
@@ -8,7 +9,7 @@ pub mod layout;
 pub mod painting;
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, BufWriter};
 
 fn main() {
     println!("Lanch Pareidolia\n");
@@ -41,6 +42,19 @@ fn main() {
     style::print(styled.clone());
     layout::print(layout.clone());
     painting::print(display_list.clone());
+
+    // Save an image:
+    let filename = String::from("output.png");
+    let mut file = BufWriter::new(File::create(&filename).unwrap());
+
+    let canvas = painting::Canvas::paint(&display_list, viewport.content);
+    let (w, h) = (canvas.width as u32, canvas.height as u32);
+    let img = image::ImageBuffer::from_fn(w, h, move |x, y| {
+        let color = canvas.pixels[(y * w + x) as usize];
+        image::Pixel::from_channels(color.r, color.g, color.b, color.a)
+    });
+    image::ImageRgba8(img).save(&mut file, image::PNG).is_ok();
+    println!("Saved output as {}", filename);
 }
 
 fn read_source(filename: String) -> String {
