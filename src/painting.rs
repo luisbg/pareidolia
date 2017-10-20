@@ -1,5 +1,5 @@
 use css::{Color, Value};
-use layout::{Rect, LayoutBox, BlockNode, AnonymousBlock};
+use layout::{Rect, LayoutBox, BoxType, AnonymousBlock};
 
 type DisplayList = Vec<DisplayCommand>;
 
@@ -41,7 +41,7 @@ fn render_background(list: &mut DisplayList, layout_box: &LayoutBox) {
 
 fn get_color(layout_box: &LayoutBox, name: &str) -> Option<Color> {
     match layout_box.box_type {
-        BlockNode(style) => match style.value(name) {
+        BoxType::Vertical(style) => match style.value(name) {
             Some(Value::ColorValue(color)) => Some(color),
             _ => None
         },

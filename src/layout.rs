@@ -6,7 +6,7 @@ use css::Unit::Px;
 use std::collections::VecDeque;
 use dom::NodeType;
 
-pub use self::BoxType::{AnonymousBlock, BlockNode};
+pub use self::BoxType::{AnonymousBlock, Vertical};
 
 #[derive(Default, Clone, Copy)]
 pub struct Dimensions {
@@ -44,7 +44,7 @@ pub struct LayoutBox<'a> {
 
 #[derive(Clone)]
 pub enum BoxType<'a> {
-    BlockNode(&'a StyledNode<'a>),
+    Vertical(&'a StyledNode<'a>),
     AnonymousBlock,
 }
 
@@ -62,7 +62,7 @@ pub fn layout_tree<'a>(node: &'a StyledNode<'a>, mut containing_block: Dimension
 fn build_layout_tree<'a>(style_node: &'a StyledNode<'a>) -> LayoutBox<'a> {
     // Create the root box.
     let mut root = LayoutBox::new(match style_node.display() {
-        Display::Block => BlockNode(style_node),
+        Display::Block => Vertical(style_node),
         Display::None => panic!("Root node has display: none.")
     });
 
@@ -80,7 +80,7 @@ impl<'a> LayoutBox<'a> {
     /// Lay out a box and its descendants.
     fn layout(&mut self, containing_block: Dimensions) {
         match self.box_type {
-            BlockNode(_) => self.layout_block(containing_block),
+            Vertical(_) => self.layout_block(containing_block),
             AnonymousBlock => {}
         }
     }
@@ -216,7 +216,7 @@ impl<'a> LayoutBox<'a> {
 
     fn get_style_node(&self) -> &'a StyledNode<'a> {
         match self.box_type {
-            BlockNode(node) => node,
+            Vertical(node) => node,
             AnonymousBlock => panic!("Anonymous block box has no style node")
         }
     }
@@ -287,7 +287,7 @@ pub fn print(root_node: LayoutBox) {
 
         // print node info
         match current.lbnode.box_type {
-            BlockNode(sn) => {
+            Vertical(sn) => {
                 let name = match sn.node.node_type {
                     NodeType::Element(ref e) => ("elem", &e.tag_name),
                     NodeType::Text(ref s) => ("txt", s),
