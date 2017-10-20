@@ -6,7 +6,7 @@ use css::Unit::Px;
 use std::collections::VecDeque;
 use dom::NodeType;
 
-pub use self::BoxType::{AnonymousBlock, Vertical};
+pub use self::BoxType::AnonymousBlock;
 
 #[derive(Default, Clone, Copy)]
 pub struct Dimensions {
@@ -45,6 +45,7 @@ pub struct LayoutBox<'a> {
 #[derive(Clone)]
 pub enum BoxType<'a> {
     Vertical(&'a StyledNode<'a>),
+    Horizontal(&'a StyledNode<'a>),
     AnonymousBlock,
 }
 
@@ -62,14 +63,16 @@ pub fn layout_tree<'a>(node: &'a StyledNode<'a>, mut containing_block: Dimension
 fn build_layout_tree<'a>(style_node: &'a StyledNode<'a>) -> LayoutBox<'a> {
     // Create the root box.
     let mut root = LayoutBox::new(match style_node.display() {
-        Display::Block => Vertical(style_node),
+        Display::Vertical => BoxType::Vertical(style_node),
+        Display::Horizontal => BoxType::Horizontal(style_node),
         Display::None => panic!("Root node has display: none.")
     });
 
     // Create the descendant boxes.
     for child in &style_node.children {
         match child.display() {
-            Display::Block => root.children.push(build_layout_tree(child)),
+            Display::Vertical => root.children.push(build_layout_tree(child)),
+            Display::Horizontal => root.children.push(build_layout_tree(child)),
             Display::None => {} // Don't lay out nodes with `display: none;`
         }
     }
@@ -80,7 +83,8 @@ impl<'a> LayoutBox<'a> {
     /// Lay out a box and its descendants.
     fn layout(&mut self, containing_block: Dimensions) {
         match self.box_type {
-            Vertical(_) => self.layout_block(containing_block),
+            BoxType::Vertical(_) => self.layout_block(containing_block),
+            BoxType::Horizontal(_) => {},
             AnonymousBlock => {}
         }
     }
@@ -216,7 +220,8 @@ impl<'a> LayoutBox<'a> {
 
     fn get_style_node(&self) -> &'a StyledNode<'a> {
         match self.box_type {
-            Vertical(node) => node,
+            BoxType::Vertical(node) | BoxType::Horizontal(node) => node,
+            BoxType::Horizontal(node) => node,
             AnonymousBlock => panic!("Anonymous block box has no style node")
         }
     }
@@ -287,7 +292,7 @@ pub fn print(root_node: LayoutBox) {
 
         // print node info
         match current.lbnode.box_type {
-            Vertical(sn) => {
+            BoxType::Vertical(sn) => {
                 let name = match sn.node.node_type {
                     NodeType::Element(ref e) => ("elem", &e.tag_name),
                     NodeType::Text(ref s) => ("txt", s),

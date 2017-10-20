@@ -45,6 +45,7 @@ fn get_color(layout_box: &LayoutBox, name: &str) -> Option<Color> {
             Some(Value::ColorValue(color)) => Some(color),
             _ => None
         },
+        BoxType::Horizontal(_) => None,
         AnonymousBlock => None
     }
 }

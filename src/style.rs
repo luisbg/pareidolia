@@ -14,7 +14,8 @@ pub struct StyledNode<'a> {
 }
 
 pub enum Display {
-    Block,
+    Horizontal,
+    Vertical,
     None
 }
 
@@ -29,9 +30,9 @@ impl<'a> StyledNode<'a> {
         match self.value("display") {
             Some(Value::Keyword(s)) => match &*s {
                 "none" => Display::None,
-                _ => Display::Block
+                _ => Display::Vertical
             },
-            _ => Display::Block
+            _ => Display::Vertical
         }
     }
 
