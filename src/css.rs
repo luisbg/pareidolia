@@ -82,6 +82,9 @@ pub fn example() -> Stylesheet {
     main_decls.push(Declaration {
         name: String::from("height"),
         value: Value::Length (400.0, Unit::Px) });
+    main_decls.push(Declaration {
+        name: String::from("display"),
+        value: Value::Keyword(String::from("horizontal")) });
 
     // div second rules
     let mut second_selects: Vec<Selector> = Vec::new();

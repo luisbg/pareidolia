@@ -64,7 +64,9 @@ fn build_layout_tree<'a>(style_node: &'a StyledNode<'a>) -> LayoutBox<'a> {
     // Create the root box.
     let mut root = LayoutBox::new(match style_node.display() {
         Display::Vertical => BoxType::Vertical(style_node),
-        Display::Horizontal => BoxType::Horizontal(style_node),
+        Display::Horizontal => {
+            // println!("LBG: here");
+            BoxType::Horizontal(style_node)},
         Display::None => panic!("Root node has display: none.")
     });
 
@@ -84,7 +86,9 @@ impl<'a> LayoutBox<'a> {
     fn layout(&mut self, containing_block: Dimensions) {
         match self.box_type {
             BoxType::Vertical(_) => self.layout_block(containing_block),
-            BoxType::Horizontal(_) => {},
+            BoxType::Horizontal(_) => {
+                println!("LBG: here and wrong");
+            },
             AnonymousBlock => {}
         }
     }
@@ -221,7 +225,6 @@ impl<'a> LayoutBox<'a> {
     fn get_style_node(&self) -> &'a StyledNode<'a> {
         match self.box_type {
             BoxType::Vertical(node) | BoxType::Horizontal(node) => node,
-            BoxType::Horizontal(node) => node,
             AnonymousBlock => panic!("Anonymous block box has no style node")
         }
     }
@@ -298,6 +301,17 @@ pub fn print(root_node: LayoutBox) {
                     NodeType::Text(ref s) => ("txt", s),
                 };
                 print!("{}: {} -- ({},{}) [{},{}]", name.0, name.1,
+                       current.lbnode.dimensions.content.x,
+                       current.lbnode.dimensions.content.y,
+                       current.lbnode.dimensions.content.width,
+                       current.lbnode.dimensions.content.height);
+            }
+            BoxType::Horizontal(sn) => {
+                let name = match sn.node.node_type {
+                    NodeType::Element(ref e) => ("elem", &e.tag_name),
+                    NodeType::Text(ref s) => ("txt", s),
+                };
+                print!("horiz {}: {} -- ({},{}) [{},{}]", name.0, name.1,
                        current.lbnode.dimensions.content.x,
                        current.lbnode.dimensions.content.y,
                        current.lbnode.dimensions.content.width,

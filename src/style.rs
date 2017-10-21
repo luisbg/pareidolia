@@ -25,11 +25,15 @@ impl<'a> StyledNode<'a> {
         self.specified_values.get(name).cloned()
     }
 
-    /// The value of the `display` property (defaults to inline).
+    /// The value of the `display` property (defaults to vertical).
     pub fn display(&self) -> Display {
         match self.value("display") {
             Some(Value::Keyword(s)) => match &*s {
                 "none" => Display::None,
+                "horizontal" => {
+                    println!("LBG: Got something horizontal");
+                    Display::Horizontal
+                },
                 _ => Display::Vertical
             },
             _ => Display::Vertical
