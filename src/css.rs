@@ -82,6 +82,12 @@ pub fn example() -> Stylesheet {
     main_decls.push(Declaration {
         name: String::from("height"),
         value: Value::Length (400.0, Unit::Px) });
+    main_decls.push(Declaration {
+        name: String::from("border-width"),
+        value: Value::Length (10.0, Unit::Px) });
+    main_decls.push(Declaration {
+        name: String::from("border-color"),
+        value: Value::ColorValue(Color {r: 255, g: 255, b: 126, a: 255}) });
 
     // div second rules
     let mut second_selects: Vec<Selector> = Vec::new();
@@ -96,6 +102,12 @@ pub fn example() -> Stylesheet {
     second_decls.push(Declaration {
         name: String::from("height"),
         value: Value::Length (250.0, Unit::Px) });
+    second_decls.push(Declaration {
+        name: String::from("border-width"),
+        value: Value::Length (10.0, Unit::Px) });
+    second_decls.push(Declaration {
+        name: String::from("border-color"),
+        value: Value::ColorValue(Color {r: 126, g: 255, b: 255, a: 255}) });
 
     // Create the stylesheet from the rules
     let mut rules: Vec<Rule> = Vec::new();
